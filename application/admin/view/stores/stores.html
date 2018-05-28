@@ -1,0 +1,209 @@
+{include file='public/header' /}
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=1.2"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/library/GeoUtils/1.2/src/GeoUtils_min.js"></script>
+<!--加载鼠标绘制工具-->
+<script type="text/javascript" src="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.js"></script>
+<link rel="stylesheet" href="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.css" />
+<!--加载检索信息窗口-->
+<script type="text/javascript" src="http://api.map.baidu.com/library/SearchInfoWindow/1.4/src/SearchInfoWindow_min.js"></script>
+<body>
+  <div class="x-nav">
+    <span class="layui-breadcrumb">
+      <a>
+        <cite>首页</cite>
+      </a>
+      <a>
+        <cite>店铺管理</cite>
+      </a>
+      <a>
+        <cite>基本设置</cite>
+      </a>
+    </span>
+    <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" href="javascript:location.replace(location.href);"
+      title="刷新">
+      <i class="layui-icon" style="line-height:30px">ဂ</i>
+    </a>
+  </div>
+  <div class="x-body">
+    <form class="layui-form" id="form_data">
+      <div class="layui-form-item">
+        <label for="L_email" class="layui-form-label">
+          起送价
+        </label>
+        <div class="layui-input-inline">
+          <input type="text" name="start_price" required="" value="{$stores.start_price}" lay-verify="number" autocomplete="off" class="layui-input">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <label for="L_email" class="layui-form-label">
+          初始距离
+        </label>
+        <div class="layui-input-inline">
+          <input type="text" name="start_distance" required="" value="{$stores.start_distance}" lay-verify="number" autocomplete="off"
+            class="layui-input">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <label for="L_email" class="layui-form-label">
+          配送范围
+        </label>
+        <div class="layui-input-inline">
+          <input type="text" name="end_distance" required="" value="{$stores.end_distance}" lay-verify="number" autocomplete="off"
+            class="layui-input">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <div class="layui-inline">
+          <label class="layui-form-label">加价</label>
+          <div class="layui-input-inline" style="width: 100px;">
+            <input name="add_distance" placeholder="米" value="{$stores.add_distance}" autocomplete="off" class="layui-input" type="text">
+          </div>
+          <div class="layui-form-mid">加</div>
+          <div class="layui-input-inline" style="width: 100px;">
+            <input name="add_price" placeholder="元" value="{$stores.add_price}" autocomplete="off" class="layui-input" type="text">
+          </div>
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <div class="layui-inline">
+          <label class="layui-form-label">营业时间</label>
+          <div class="layui-input-inline">
+            <input class="layui-input" name="time" value="{$stores.start_time|date='d:i:s',###} - {$stores.end_time|date='d:i:s',###}"
+              id="test9" placeholder=" - " type="text">
+          </div>
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <label for="L_pass" class="layui-form-label">
+          店铺地址
+        </label>
+        <div class="layui-input-inline">
+          <input name="location" required="" value="{$stores.location}" lay-verify="" autocomplete="off" class="layui-input">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <label for="L_pass" class="layui-form-label">
+          画的图形
+        </label>
+        <div class="layui-input-inline">
+        <input name="range_info" id="distributeRange" required="" value='{$stores.range_info}' lay-verify="" autocomplete="off"
+  class="layui-input">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <label for="L_repass" class="layui-form-label">
+        </label>
+        <button type="button" class="layui-btn" lay-filter="save" lay-submit="">
+          保存
+        </button>
+      </div>
+    </form>
+    <canvas id="map-container" style="width:600px;height:600px;position: absolute;top: 50px;margin-left: 400px;">
+
+    </canvas>
+  </div>
+  {include file='public/base_js' /}
+  <script>
+    layui.use(['layer', 'form', 'laydate'], function () {
+      var form = layui.form,
+        layer = layui.layer,
+        laydate = layui.laydate;
+      //监听提交
+      form.on('submit(save)', function () {
+        push("", "{:url('stores/saveStores')}", $('#form_data').serialize());
+      });
+      //时间范围
+      laydate.render({
+        elem: '#test9',
+        type: 'time',
+        range: true
+      });
+    })
+
+ 
+  </script>
+  <div id="container" style="width:600px;height:600px;position:absolute;margin-left:420px;top:40px;"></div>
+  <script type="text/javascript">
+    
+    //获取点的经纬度
+    var lat=parseFloat("{$stores.lat}");
+    var lng=parseFloat("{$stores.lng}");
+    
+    var range_info='{$stores.range_info}';
+    range_info=JSON.parse(range_info);
+
+    //创建地图以及设定
+    var map = new BMap.Map("container");//获取地图元素
+    var pt = new BMap.Point(lng,lat);//设置点的位置
+    var mkr = new BMap.Marker(pt);//创建一个点
+    map.addOverlay(mkr);//画一个点
+    map.centerAndZoom(pt, 16);//
+    map.enableScrollWheelZoom(); //开启滚动缩放
+    map.enableContinuousZoom(); //开启缩放平滑
+
+    //该事件用于添加点
+    map.addEventListener("click", function (e) {
+      mkr.setPosition(e.point);//设置该点的位置
+      map.addOverlay(mkr);//画一波
+    });
+
+    //设置覆盖物样式
+    var styleOptions = {
+        strokeColor:"blue",    //边线颜色。
+        fillColor:"blue",      //填充颜色。当参数为空时，圆形将没有填充效果。
+        strokeWeight: 3,       //边线的宽度，以像素为单位。
+        strokeOpacity: 0.8,	   //边线透明度，取值范围0 - 1。
+        fillOpacity: 0.4,      //填充的透明度，取值范围0 - 1。
+        strokeStyle: 'solid' //边线的样式，solid或dashed。
+    }
+    //实例化鼠标绘制工具
+    var drawingManager = new BMapLib.DrawingManager(map, {
+        isOpen: false, //是否开启绘制模式
+        enableDrawingTool: true, //是否显示工具栏
+        drawingToolOptions: {
+            anchor: BMAP_ANCHOR_TOP_RIGHT, //位置
+            offset: new BMap.Size(5, 5), //偏离值
+            drawingModes: [
+              BMAP_DRAWING_CIRCLE,
+              BMAP_DRAWING_POLYGON,
+              BMAP_DRAWING_RECTANGLE
+            ],
+        },
+        circleOptions: styleOptions, //圆的样式
+        polygonOptions: styleOptions, //多边形的样式
+        rectangleOptions: styleOptions //矩形的样式
+    });
+
+    //获取覆盖物信息
+    var overlays = [];
+	  var overlaycomplete = function(e){
+        clearAll();
+        overlays.push(e.overlay);
+        var path = e.overlay.getPath();
+        $("#distributeRange").val(JSON.stringify(path));
+    };
+
+    //添加鼠标绘制工具监听事件，用于获取绘制结果
+    drawingManager.addEventListener('overlaycomplete', overlaycomplete);
+    function clearAll() {
+		for(var i = 0; i < overlays.length; i++){
+            map.removeOverlay(overlays[i]);
+        }
+    }
+
+    //生成范围圈
+    function polygon() {
+        var pts = [];
+        for(j = 0; j < range_info.length; j++) {
+          pts.push(new BMap.Point(range_info[j]['lng'],range_info[j]['lat']));
+        }
+        ply = new BMap.Polygon(pts);
+        map.clearOverlays();
+        map.addOverlay(ply);
+    }
+    polygon();
+  </script>
+</div>
+<div id="result"></div>
+</body>
+</html>

@@ -1,0 +1,65 @@
+{include file="public/header"/}
+  
+  <body>
+    <div class="x-nav">
+      <span class="layui-breadcrumb">
+        <a href="">首页</a>
+        <a href="">菜品</a>
+      </span>
+      <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" href="javascript:location.replace(location.href);" title="刷新">
+        <i class="layui-icon" style="line-height:30px">ဂ</i></a>
+    </div>
+    <div class="x-body">
+      <xblock>
+        <button class="layui-btn" onclick="x_admin_show('添加','{:url('dish/addDish')}',500,440)"><i class="layui-icon"></i>添加</button>
+        <span class="x-right" style="line-height:40px">共有数据：{$count} 条</span>
+      </xblock>
+      <table class="layui-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>所属分类</th>
+            <th>菜名</th>
+            <th>缩略图</th>
+            <th>原价</th>
+            <th>现价</th>
+            <th>库存</th>
+            <th>加入时间</th>
+            <th>操作</th>
+        </thead>
+        <tbody id="dish-img">
+          {foreach $dish_list as $v}
+          <tr>
+            <td>{$v.id}</td>
+            <td>{$v.category_id|category}</td>
+            <td>{$v.dish_name}</td>
+            <td><img src="{$v.dish_img}" layer-src="{$v.dish_img}" style="width:192px;height:60px;"></td>
+            <td>￥{$v.old_price}</td>
+            <td>￥{$v.new_price}</td>
+            <td>{$v.dish_count}</td>
+            <td>{$v.create_time}</td>
+            <td class="td-manage">
+              <a title="编辑"  onclick="x_admin_show('编辑','{:url('dish/editDish',['id'=>$v.id])}',470,440)" href="javascript:;">
+                <i class="layui-icon">&#xe642;</i>
+              </a>
+              <a title="删除" onclick="del(this,'{:url('dish/deleteDish')}','id={$v.id}')" href="javascript:;">
+                <i class="layui-icon">&#xe640;</i>
+              </a>
+            </td>
+          </tr>
+          {/foreach}
+        </tbody>
+      </table>
+    </div>
+    <script>
+    layui.use(['layer'], function () {
+        $ = layui.jquery;
+        var layer = layui.layer;
+        //图片弹出
+        layer.photos({
+          photos: '#dish-img'
+          , anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+        });
+      });
+    </script>
+{include file="public/footer"/}

@@ -1,0 +1,42 @@
+<script>
+    /*删除*/
+    function del(obj, url, id) {
+        layer.confirm('确认要删除吗？', function (index) {
+            push(obj, url, id);
+        });
+    }
+    function push(obj, url, data) {
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: data,
+            dataType: "json",
+            success: function (msg) {
+                switch (msg.status) {
+                    case 1:
+                        layer.alert(msg.message, {
+                            icon: 6
+                        }, function () {
+                                var index = parent.layer.getFrameIndex(window.name);
+                                parent.layer.close(index);
+                                window.parent.location.reload();
+                        });
+                        break;
+                    case 2:
+                        layer.alert(msg.message, {
+                            icon: 6
+                        }, function () {
+                            window.location.reload();
+                        });
+                        break;
+                    case 0:
+                        layer.msg(msg.message, {
+                            icon: 2,
+                            time: 1000
+                        });
+                        break;
+                }
+            }
+        })
+    }
+</script>
