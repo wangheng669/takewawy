@@ -1,0 +1,59 @@
+<view class="container">
+  <view class='top-container'>
+    <text wx:if="{{now_time >= start_time && now_time <= end_time}}">营业中...</text>
+    <text wx:else>未营业</text>
+    <text class='location' bindtap='changeLocation'>{{location}}</text>
+  </view>
+  <view class="nav_left">
+    <block wx:for="{{category_data}}">
+    <view class='nav-left-items' bindtap="scrollToViewFn" data-id="{{item.id}}">
+      {{item.category_name}}
+      <!-- <text class='nav-left-count' wx:if="0"></text> -->
+    </view>
+    </block>
+  </view>
+  <scroll-view class="nav_right" scroll-y="true" scroll-into-view="{{toView}}">
+    <block wx:for="{{category_data}}" wx:for-item="i">
+    <view class='nav-right-title' id="{{ 'inToView'+i.id}}">
+      <text>{{i.category_name}}</text>
+    </view>
+    <block wx:for="{{dish_data}}" wx:for-item="j">
+    <block wx:for="{{j}}">
+    <view class='nav-right-items' wx:if="{{item.category_id == i.id}}">
+      <image src='http://127.0.0.1{{item.dish_img}}'></image>
+      <view class='nav-right-dish'>
+        <text class='dish-name'>{{item.dish_name}}</text>
+        <text class='dish-month-count'>月售0份</text>
+        <view class='dish-price'>
+          <text class='old-price'>￥{{item.old_price}}</text>
+          <text class='new-price'>￥{{item.new_price}}</text>
+        </view>
+        <text class='dish-del' bindtap='delDish' data-price='{{item.new_price}}' data-id="{{item.id}}" wx:if="{{good[item.id] >= 1}}">-</text>
+        <text class='dish-count'>{{good[item.id] ? good[item.id] : 0}}</text>
+        <text class='dish-add' bindtap='addDish' data-price='{{item.new_price}}' data-id="{{item.id}}">+</text>
+      </view>
+    </view>
+    </block>
+    </block>
+    </block>
+  </scroll-view>
+  <view class='footer-container'>
+    <view class='car'>
+      <image src='../images/cart.png'></image>
+      <text class='total-count'>{{count}}</text>
+    </view>
+    <view class='total'>合计:<text class='total-price'>{{price}}</text></view>
+    <block wx:if="{{now_time < start_time || now_time > end_time}}">
+      <view class='settle' style='background:#ccc'>未营业</view>
+    </block>
+    <block wx:elif="{{location == '超出配送范围'}}">
+      <view class='settle' style='background:#ccc'>超出配送范围</view>
+    </block>
+    <block wx:elif="{{price >= start_price}}">
+      <view class='settle' bindtap='settle' data-price='{{price}}' data-distance='{{now_distance}}'>去结算</view>
+    </block>  
+    <block wx:else>
+      <view class='settle' style='background:#ccc'>满{{start_price}}元起送</view>
+    </block>
+  </view>
+</view>

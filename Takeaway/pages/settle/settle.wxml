@@ -1,0 +1,3 @@
+<view>
+  <text>老铁,你要付{{price}}元!!!</text>
+</view>
